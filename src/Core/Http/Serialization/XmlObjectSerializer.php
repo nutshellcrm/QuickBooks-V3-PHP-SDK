@@ -115,7 +115,7 @@ class XmlObjectSerializer extends IEntitySerializer
         $resultObject = null;
         $resultObjects = null;
 
-        $responseXmlObj = simplexml_load_string($responseXml);
+        $responseXmlObj = self::loadXMLFromString($responseXml);
         foreach ($responseXmlObj as $oneXmlObj) {
             $oneXmlElementName = (string)$oneXmlObj->getName();
 
@@ -233,7 +233,7 @@ class XmlObjectSerializer extends IEntitySerializer
         $resultObject = null;
         $resultObjects = null;
 
-        $responseXmlObj = simplexml_load_string($this->sanitizeXML($message));
+        $responseXmlObj = self::loadXMLFromString($message);
 
         //handle count(*) case, for example Select count(*) from Invoice, and also handle the CDC case
         if(isset($responseXmlObj->attributes()['totalCount']) && !isset($responseXmlObj->attributes()['startPosition']) && !isset($responseXmlObj->attributes()['maxResults'])){
@@ -270,7 +270,7 @@ class XmlObjectSerializer extends IEntitySerializer
 	 * @param $string
 	 * @return string|string[]|null
 	 */
-	private function sanitizeXML($string)
+	public static function sanitizeXML($string)
 	{
 		if (!empty($string)) {
 			// remove EOT+NOREP+EOX|EOT+<char> sequence (FatturaPA)
@@ -310,5 +310,15 @@ class XmlObjectSerializer extends IEntitySerializer
 		}
 
 		return $string;
+	}
+
+	/**
+	 * Sanitizes invalid characters from string, then creates an XML object from it
+	 *
+	 * @param $xmlString
+	 * @return \SimpleXMLElement
+	 */
+	public static function loadXMLFromString($xmlString) {
+		return simplexml_load_string(self::sanitizeXML($xmlString));
 	}
 }
