@@ -18,6 +18,7 @@ namespace QuickBooksOnline\API\DataService;
 
 use QuickBooksOnline\API\Core\CoreHelper;
 use QuickBooksOnline\API\Core\Http\Serialization\IEntitySerializer;
+use QuickBooksOnline\API\Core\Http\Serialization\XmlObjectSerializer;
 use QuickBooksOnline\API\Core\HttpClients\FaultHandler;
 use QuickBooksOnline\API\Core\HttpClients\RestHandler;
 use QuickBooksOnline\API\Core\ServiceContext;
@@ -1019,7 +1020,7 @@ class DataService
             $this->lastError = false;
             $parsedResponseBody = null;
             try {
-                $responseXmlObj = simplexml_load_string($responseBody);
+                $responseXmlObj = XmlObjectSerializer::loadXMLFromString($responseBody);
                 if ($responseXmlObj && $responseXmlObj->QueryResponse) {
                     $tmpXML = $responseXmlObj->QueryResponse->asXML();
                     $parsedResponseBody = $this->responseSerializer->Deserialize($tmpXML, false);
@@ -1105,7 +1106,7 @@ class DataService
             $this->lastError = false;
             $parsedResponseBody = null;
             try {
-                $responseXmlObj = simplexml_load_string($responseBody);
+                $responseXmlObj = XmlObjectSerializer::loadXMLFromString($responseBody);
                 if ($responseXmlObj && $responseXmlObj->QueryResponse) {
                     $parsedResponseBody = $this->responseSerializer->Deserialize($responseXmlObj->QueryResponse->asXML(), false);
                 }
@@ -1165,7 +1166,7 @@ class DataService
             $this->lastError = false;
             $returnValue = new IntuitCDCResponse();
             try {
-                $xmlObj = simplexml_load_string($responseBody);
+                $xmlObj = XmlObjectSerializer::loadXMLFromString($responseBody);
                 $responseArray = $xmlObj->CDCResponse->QueryResponse;
                 if(sizeof($responseArray) != sizeof($entityList)){
                     throw new ServiceException("The number of Entities requested on CDC does not match the number of Response.");

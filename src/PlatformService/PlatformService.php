@@ -3,6 +3,7 @@
 namespace QuickBooksOnline\API\PlatformService;
 
 use QuickBooksOnline\API\Core\CoreConstants;
+use QuickBooksOnline\API\Core\Http\Serialization\XmlObjectSerializer;
 use QuickBooksOnline\API\Core\ServiceContext;
 use QuickBooksOnline\API\Exception\SdkExceptions\InvalidParameterException;
 use QuickBooksOnline\API\Core\HttpClients\RequestParameters;
@@ -99,7 +100,7 @@ class PlatformService
         $uriFragment = implode(CoreConstants::SLASH_CHAR, array('v1', 'Connection', 'Reconnect'));
         $requestParameters = new RequestParameters(null, 'GET', null, $uriFragment);
         list($respCode, $respXml) = $this->restRequestHandler->sendRequest($requestParameters, $this->requestXmlDocument, null);
-        return simplexml_load_string($respXml);
+        return XmlObjectSerializer::loadXMLFromString($respXml);
     }
 
     /**
@@ -114,7 +115,7 @@ class PlatformService
         $uriFragment = implode(CoreConstants::SLASH_CHAR, array('v1', 'Connection', 'Disconnect'));
         $requestParameters = new RequestParameters(null, 'GET', null, $uriFragment);
         list($respCode, $respXml) = $this->restRequestHandler->sendRequest($requestParameters, $this->requestXmlDocument, null);
-        return simplexml_load_string($respXml);
+        return XmlObjectSerializer::loadXMLFromString($respXml);
     }
 
 
@@ -129,6 +130,6 @@ class PlatformService
         $uriFragment = implode(CoreConstants::SLASH_CHAR, array('v1', 'user', 'current'));
         $requestParameters = new RequestParameters(null, 'GET', null, $uriFragment);
         list($respCode, $respXml) = $this->restRequestHandler->sendRequest($requestParameters, $this->requestXmlDocument, null);
-        return simplexml_load_string($respXml);
+        return XmlObjectSerializer::loadXMLFromString($respXml);
     }
 }

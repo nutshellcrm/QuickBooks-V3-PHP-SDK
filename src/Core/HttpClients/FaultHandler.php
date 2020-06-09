@@ -1,6 +1,7 @@
 <?php
 namespace QuickBooksOnline\API\Core\HttpClients;
 
+use QuickBooksOnline\API\Core\Http\Serialization\XmlObjectSerializer;
 use QuickBooksOnline\API\Core\ServiceContext;
 
 /**
@@ -112,7 +113,7 @@ class FaultHandler
      * @var String The http response body in XML format
      */
     public function parseResponse($message){
-      $xmlObj = simplexml_load_string($message);
+      $xmlObj = XmlObjectSerializer::loadXMLFromString($message);
 
       if(!$this->isTheErrorBodyInStandardFormat($xmlObj)){
           return;

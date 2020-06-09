@@ -1,6 +1,7 @@
 <?php
 namespace QuickBooksOnline\API\Utility;
 
+use QuickBooksOnline\API\Core\Http\Serialization\XmlObjectSerializer;
 use QuickBooksOnline\API\Exception\IdsException;
 
 /**
@@ -21,7 +22,7 @@ class IntuitErrorHandler
             return;
         }
 
-        $responseXml = simplexml_load_string($response);
+        $responseXml = XmlObjectSerializer::loadXMLFromString($response);
         self::HandleErrorsXml($responseXml);
     }
 
@@ -71,7 +72,7 @@ class IntuitErrorHandler
         }
 
         try {
-            $doc = simplexml_load_string($inputString);
+            $doc = XmlObjectSerializer::loadXMLFromString($inputString);
         } catch (\Exception $e) {
             return false;
         }

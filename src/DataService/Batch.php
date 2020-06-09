@@ -366,7 +366,7 @@ class Batch
       try {
           // No JSON support here yet
           // de serialize object
-          $responseXmlObj = simplexml_load_string($responseBody);
+          $responseXmlObj = XmlObjectSerializer::loadXMLFromString($responseBody);
           foreach ($responseXmlObj as $oneXmlObj) {
               // process batch item
               $intuitBatchItemResponse = $this->ProcessBatchItemResponse($oneXmlObj);

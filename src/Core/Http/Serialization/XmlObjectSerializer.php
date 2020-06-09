@@ -115,7 +115,7 @@ class XmlObjectSerializer extends IEntitySerializer
         $resultObject = null;
         $resultObjects = null;
 
-        $responseXmlObj = simplexml_load_string($responseXml);
+        $responseXmlObj = self::loadXMLFromString($responseXml);
         foreach ($responseXmlObj as $oneXmlObj) {
             $oneXmlElementName = (string)$oneXmlObj->getName();
 
@@ -233,7 +233,7 @@ class XmlObjectSerializer extends IEntitySerializer
         $resultObject = null;
         $resultObjects = null;
 
-        $responseXmlObj = simplexml_load_string($this->sanitizeXML($message));
+        $responseXmlObj = self::loadXMLFromString($message);
 
         //handle count(*) case, for example Select count(*) from Invoice, and also handle the CDC case
         if(isset($responseXmlObj->attributes()['totalCount']) && !isset($responseXmlObj->attributes()['startPosition']) && !isset($responseXmlObj->attributes()['maxResults'])){
@@ -270,9 +270,11 @@ class XmlObjectSerializer extends IEntitySerializer
 	 * @param $string
 	 * @return string|string[]|null
 	 */
-	private function sanitizeXML($string)
+	public static function sanitizeXML($string)
 	{
 		if (!empty($string)) {
+			$originalString = $string;
+
 			// remove EOT+NOREP+EOX|EOT+<char> sequence (FatturaPA)
 			$string = preg_replace('/(\x{0004}(?:\x{201A}|\x{FFFD})(?:\x{0003}|\x{0004}).)/u', '', $string);
 
@@ -293,6 +295,7 @@ class XmlObjectSerializer extends IEntitySerializer
 			$string = preg_replace($regex, '', $string);
 
 			$result = "";
+			$invalidCharacters = [];
 			$current = null;
 			$length = strlen($string);
 			for ($i = 0; $i < $length; $i++) {
@@ -304,11 +307,33 @@ class XmlObjectSerializer extends IEntitySerializer
 					(($current >= 0xE000) && ($current <= 0xFFFD)) ||
 					(($current >= 0x10000) && ($current <= 0x10FFFF))) {
 					$result .= chr($current);
+				} else {
+					$invalidCharacters[] = chr($current);
 				}
 			}
 			$string = $result;
+
+			if ($string !== $originalString && class_exists('Nlib_Logger')) {
+				\Nlib_Logger::warn('Quickbooks: API response contained invalid characters that were filtered out', [
+					'fields' => [
+						'responseBase64' => base64_encode($originalString),
+						'filteredBase64' => base64_encode($string),
+						'invalidCharacters' => base64_encode(implode(',', $invalidCharacters)),
+					],
+				]);
+			}
 		}
 
 		return $string;
+	}
+
+	/**
+	 * Sanitizes invalid characters from string, then creates an XML object from it
+	 *
+	 * @param $xmlString
+	 * @return \SimpleXMLElement
+	 */
+	public static function loadXMLFromString($xmlString) {
+		return simplexml_load_string(self::sanitizeXML($xmlString));
 	}
 }
